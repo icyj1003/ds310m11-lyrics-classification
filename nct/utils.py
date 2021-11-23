@@ -9,11 +9,12 @@ genres = ['nhac-tre', 'tru-tinh',
 
 def lyric_preprocess(lyric):
     if lyric != None:
-        # xóa các ký tự không cần thiết
+
         lyric = re.sub(
             r'[^\s\wáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệóòỏõọôốồổỗộơớờởỡợíìỉĩịúùủũụưứừửữựýỳỷỹỵđ]', '', str(lyric))
-        # xóa khoảng trắng thừa
+
         lyric = re.sub(r'\s+', ' ', str(lyric))
+
         return lyric
     else:
         return None
@@ -77,34 +78,24 @@ def getInfo(url):
 
         artis = title_artis[1].strip()
 
-        lyric = [line.strip() for line in lyric.lower().strip().split('\n')
-                 if line.find(':') == -1 and line != title.lower() and line != '']
+        lines = []
 
-        lyric = ' '.join(lyric).strip()
+        for line in lyric.lower().strip().split('\n'):
+            if line != '' and not line.startswith('đk') and not line.startswith('dk') and not line.startswith('[') and not line.__contains__(':') and len(line) > 5 and line.strip() != title.lower().strip():
+                line = re.sub(
+                    r'[^\s\wáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệóòỏõọôốồổỗộơớờởỡợíìỉĩịúùủũụưứừửữựýỳỷỹỵđ]', ' ', str(line))
+                line = re.sub(r'\s+', ' ', str(line))
+                lines.append(line.strip())
 
-        lyric = lyric_preprocess(lyric)
+        lyric = ' '.join(lines).strip()
+
+        print(lyric)
+
+        if lyric.find('hiện chưa có lời bài hát nào') != -1:
+            lyric = None
 
     except:
 
         pass
 
-    return [title, artis, lyric]
-
-
-def getLyrics(songs, genre):
-
-    lyrics = []
-
-    with tqdm(total=len(songs), desc=f'Đang lấy lyric {genre}') as pbar:
-
-        for song in songs:
-
-            songInfo = getInfo(song)
-
-            songInfo.append(genre)
-
-            lyrics.append(songInfo)
-
-            pbar.update(1)
-
-    return lyrics
+    return [title, url, lyric]
